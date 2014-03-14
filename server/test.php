@@ -37,7 +37,7 @@ function convert_ds($date)
 } 
 try
 {
-$d = new mysqli('localhost', 'root', 'root', 'commt');
+$d = new mysqli('127.0.0.1', 'root', 'root', 'commt');
 
 $server_method = $_SERVER['REQUEST_METHOD'];
 
@@ -46,8 +46,19 @@ $action = $_REQUEST['action'];
 switch($action)
 {
     case "push":
-        $d->query("INSERT INTO comments (article_id, parent_id, comment, author_id, created_at, updated_at) VALUES ('".$_REQUEST['tid']."', '".$_REQUEST['pid']."', '".$_REQUEST['comment']."',  '".$_REQUEST['aid']."', now(), now()) ");
-        $content = array('status' => 'success');
+        $rs = $d->query("SELECT u.id FROM user_session c LEFT JOIN user u ON c.username = u.username WHERE c.session_token = '".$_REQUEST['token']."' AND c.username = '".$_REQUEST['username']."' AND token_expired = 0 ");
+        $data = array();
+
+        if($rs->num_rows == 0)
+        {
+            $content = array('status' => 'failure', 'message' => 'Invalid Authentication Details');
+        }
+        else
+        {
+            $row = $rs->fetch_assoc();
+            $d->query("INSERT INTO comments (article_id, parent_id, comment, author_id, created_at, updated_at) VALUES ('".$_REQUEST['tid']."', '".$_REQUEST['pid']."', '".$_REQUEST['comment']."',  '".$row['id']."', now(), now()) ");
+            $content = array('status' => 'success');
+        }
         break;
     case "getComments":
         $rs = $d->query("SELECT c.id, c.comment, c.created_at, u.username as author FROM comments c LEFT JOIN user u ON c.author_id = u.id WHERE c.article_id = '".$_REQUEST['tid']."' ORDER BY c.created_at DESC ");
@@ -61,6 +72,48 @@ switch($action)
         }
         $content = array('status' => 'success', 'data' => $data);
         break;
+    case "login_check":
+        //echo "SELECT id FROM user_session WHERE username = '".$_REQUEST['username']."' AND session_token = '".$_REQUEST['token']."'  AND token_expired = 0";
+        $rs = $d->query("SELECT id FROM user_session WHERE username = '".$_REQUEST['username']."' AND session_token = '".$_REQUEST['token']."'  AND token_expired = 0 ");
+        $content = array();
+        
+        $content['status'] = 'success';
+        $content['login'] = $rs->num_rows == 0 ? 0 : 1;
+        break;
+    case "login":
+        $rs = $d->query("SELECT id FROM user WHERE username = '".$_REQUEST['username']."' AND password = '".$_REQUEST['password']."' ");
+        if($rs->num_rows == 0)
+        {
+            $content = array('status' => 'failure', 'message' => 'Invalid Authentication Details');
+        }
+        else
+        {
+            $token = substr(md5('App'.time()), 10);
+            $d->query("INSERT INTO user_session (username, session_token, token_created, token_expired) VALUES ('".$_REQUEST['username']."', '".$token."', now(),  0) ");
+            $content = array('status' => 'success', 'token' => $token);
+        }
+        
+        break;
+    case "getUserInfo":
+        $rs = $d->query("SELECT u.username FROM user_session c LEFT JOIN user u ON c.username = u.username WHERE c.session_token = '".$_REQUEST['token']."' AND c.username = '".$_REQUEST['username']."' AND token_expired = 0 ");
+        $data = array();
+
+        if($rs->num_rows == 0)
+        {
+            $content = array('status' => 'failure', 'message' => 'Invalid Authentication Details');
+        }
+        else
+        {
+            $row = $rs->fetch_assoc();
+            $content = array('status' => 'success', 'data' => array('username' => $row['username']));
+        }
+        
+        break;
+
+    default:
+        $content = array('status' => 'failure', 'message' => 'Invalid Request');
+        break;
+
 }
 
 
