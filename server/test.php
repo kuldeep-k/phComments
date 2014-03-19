@@ -61,7 +61,8 @@ switch($action)
         }
         break;
     case "getComments":
-        $rs = $d->query("SELECT c.id, c.comment, c.created_at, u.username as author FROM comments c LEFT JOIN user u ON c.author_id = u.id WHERE c.article_id = '".$_REQUEST['tid']."' ORDER BY c.created_at DESC ");
+        
+        $rs = $d->query("SELECT c.id, c.comment, c.created_at, u.username as author, c.parent_id as pid FROM comments c LEFT JOIN user u ON c.author_id = u.id WHERE c.article_id = '".$_REQUEST['tid']."' ORDER BY c.created_at DESC ");
         $data = array();
         
         while($row = $rs->fetch_assoc())

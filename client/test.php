@@ -26,9 +26,16 @@
         padding-left: 50px;
         width: 75%;
     }
+    #comments .default-comment-row {
+        list-style-type: none;
+    }
 
     #comments .comment-row {
+        list-style-type: none;
         margin-top: 15px;
+    }
+
+    #comments .comment-row .row {
         padding: 10px;
         color: #4a6687;
         font-size: 11px;
@@ -36,7 +43,8 @@
         background-color: #e2e3e4;
         border-radius: 15px;
         box-shadow: 2px 2px 3px 3px #ccc;
-        transform: skew(-10deg);
+        /*transform: skew(-10deg);
+        -webkit-transform: skew(-10deg);*/
     }
 
     #comments .comment-row .comment {
@@ -92,7 +100,7 @@
 
 <script>
 
-
+var article_id = 2;
 
 function showMore(){
     $("#comments").find("div.hide").removeClass('hide');
@@ -181,6 +189,17 @@ function getUserInfo()
                     ckSession.unset('session');
                     //removeSession(name);   
                     $('.User').html('Anonymous (post not allowed).'); 
+
+                    $.ajax({
+                        url: 'http://localhost/restc/server/test.php',
+                        type: 'post',
+                        dataType: 'json',
+                        data: "action=logout&username=" + ses.uname + "&token=" + ses.token + "",
+                        success: function(response){
+                        },
+                        error: function(response){
+                        }
+                    });
                    
                 });
                 
@@ -200,10 +219,12 @@ function getComments(tid)
         
         data: "action=getComments&tid=" + tid,
         success: function(response){
-            $('#comments .comment-row').remove();
-            for(i=0;i<response.data.length;i++)
+            $('#comments li.comment-row').remove();
+            var htm = '';
+            /*for(i=0;i<response.data.length;i++)
             {
-                var cl = $('#comments').find('div.default-comment-row').clone();
+                
+                var cl = $('#comments').find('li.default-comment-row').clone();
                 cl.find('.comment').html(response.data[i].comment);
                 cl.find('.timeago').html(response.data[i].timeago);
                 cl.find('.author').html(response.data[i].author);
@@ -213,10 +234,26 @@ function getComments(tid)
                 {
                     cl.addClass('hide');
                 }
-                cl.append('<div class="reply"><a href="javascript:void(0)" onClick="javascript:replyComment('+ response.data[i].id +');">Reply</a>');    
-                cl.appendTo($('#comments'));
+                cl.append('<div class="reply"><a href="javascript:void(0)" onClick="javascript:replyComment('+ response.data[i].id +');">Reply</a>');
+                
+                cl.appendTo($('#comments ul'));
+                
+                
+            }*/
+            for(i=0;i<response.data.length;i++)
+            {
+                if(response.data[i].pid == 0)
+                {
+                                        
+                    htm += '<li class="comment-row comment-' + response.data[i].id + '">';
+                    htm += '<div class="row"><div class="comment">'+ response.data[i].comment +'</div><div class="brow"><div class="timeago">'+ response.data[i].timeago +'</div><div class="author">' + response.data[i].author + '</div><div class="reply"><a href="javascript:void(0)" onClick="javascript:replyComment('+ response.data[i].id +');">Reply</a></div></div></div>';
+                    htm = checkChild(response.data, response.data[i].id, htm);
+                    htm += '</li>';   
+                    
+                }
                 
             }
+            $('#comments ul').append($(htm));
             if(response.data.length > 5)
             {
                 $('.more').html('<a href="javascript:void(0)" onClick="javascript:showMore();">More ....</a>');
@@ -227,9 +264,47 @@ function getComments(tid)
     });
 }
 
+function addRow()
+{
+
+    
+}
+function addRow1(data_row)
+{
+    var cl = $('#comments').find('li.default-comment-row').clone();
+    cl.find('.comment').html(data_row.comment);
+    cl.find('.timeago').html(data_row.timeago);
+    cl.find('.author').html(data_row.author);
+    cl.removeClass('default-comment-row').addClass('comment-row');
+    cl.addClass('comment-' + data_row.id);
+    cl.append('<div class="reply"><a href="javascript:void(0)" onClick="javascript:replyComment('+ data_row.id +');">Reply</a>'); 
+    return cl;
+} 
+
+function checkChild(data, pid, htm) 
+{
+    for(k1 in data)
+    {
+        if(data[k1].pid == pid )
+        {
+            console.log(data[k1].pid);
+            htm += '<ul>';
+            htm += '<li class="comment-row comment-' + data[k1].id + '">';
+            htm += '<div class="row"><div class="comment">'+ data[k1].comment +'</div><div class="brow"><div class="timeago">'+ data[k1].timeago +'</div><div class="author">' + data[k1].author + '</div><div class="reply"><a href="javascript:void(0)" onClick="javascript:replyComment('+ data[k1].id +');">Reply</a></div></div></div>';
+            checkChild(data, data[k1].id, htm);
+            htm += '</li></ul>';
+        }
+    }   
+    return htm;
+}
+
 function replyComment(pid) {
-    var reply_html = '<div id="post-reply"><textarea id="rcomment" name="rcomment" rows=4 cols=40></textarea><input type="button" class="button-rpost" name="post" value="Post" ></div>';
-    $(reply_html).appendTo($('#comments'));
+    var reply_html = '<div id="post-reply"><textarea class="rcomment" name="rcomment" rows=4 cols=40></textarea><input type="button" class="button-rpost" name="post" value="Post" ></div>';
+        
+    $(reply_html).appendTo($('#comments .comment-' + pid + ' .row:first'));
+    $('#comments .comment-' + pid).find('.button-rpost').click(function(){
+        pushComment(article_id, pid, $('#comments .comment-' + pid).find('textarea.rcomment').val());
+    });
 }
 
 function pushComment(tid, pid, comment)
@@ -334,33 +409,11 @@ function checkLogin()
     }
 }
 
-function doLogout()
-{
-    $.ajax({
-        url: 'http://localhost.testc',
-        type: 'post',
-        dataType: 'json',
-        data: "action=logout&token=abcdefgh",
-        success: function(response){
-        },
-        error: function(response){
-        }
-    });
-}
 
-
-function getCommentsWithFocus(tid, cid)
+function periodicallyCheckNewComments()
 {
-    $.ajax({
-        url: 'http://localhost.testc',
-        type: 'post',
-        dataType: 'json',
-        data: "action=getComments&token=abcdefgh&tid=" + tid,
-        success: function(response){
-        },
-        error: function(response){
-        }
-    });
+    getComments(article_id);
+    //setTimeout('periodicallyCheckNewComments()', 10000);
 }
 
 var ckSession = new Object();
@@ -395,8 +448,6 @@ $(document).ready(function(){
         document.cookie = name + '=; expires='+ this.expires + '; path=/';
     }
 
-
-    var article_id = 2;
     ckSession = getSession();
     
     console.log(ckSession);
@@ -415,6 +466,8 @@ $(document).ready(function(){
     getLoginInfo();
     getComments(article_id);
 
+    //setTimeout('periodicallyCheckNewComments()', 10000);
+
 });
 
 </script>
@@ -432,11 +485,15 @@ $(document).ready(function(){
 
 <div id="comments"> 
     <h3>Comments : </h3>
-    <div class="default-comment-row">
-        <div class="comment"></div>
-        <div class="brow"><div class="timeago"></div>
-        <div class="author"></div></div>
-    </div>
+    <ul>
+    <li class="default-comment-row">
+        <div class="row">
+            <div class="comment"></div>
+            <div class="brow"><div class="timeago"></div>
+            <div class="author"></div></div>
+        </div>
+    </li>
+    </ul>
 </div>
 <div class="more"></div>
 
