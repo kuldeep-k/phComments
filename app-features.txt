@@ -1,0 +1,22 @@
+Listing
+Hierarchy handling
+simple db based login
+session maintain by cookie
+Add comment & reflect in time
+
+
+show more functionality
+comment refresh without kill your
+Fix logout
+Social login
+convert server side to REST
+refresh after login
+user section
+    details
+    comment history
+    settings
+
+
+
+    
+        
