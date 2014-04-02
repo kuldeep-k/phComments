@@ -2,6 +2,8 @@
 
 date_default_timezone_set('Asia/Calcutta');
 
+define('PAGE_SIZE', 5);
+//sleep(1);
 function convert_ds($date)
 {
     $t = strtotime($date);
@@ -45,6 +47,29 @@ $server_method = $_SERVER['REQUEST_METHOD'];
 
 $action = $_REQUEST['action'];
 
+function checkChild($pid)
+{
+    global $d, $tcount, $comments_list;
+    $page_size = PAGE_SIZE * (int)$_REQUEST['page'];        
+    $rs = $d->query("SELECT c.id, c.comment, c.created_at, u.username as author, c.parent_id as pid FROM comments c LEFT JOIN user u ON c.author_id = u.id WHERE c.article_id = '".$_REQUEST['tid']."' AND c.parent_id = ".$pid." ORDER BY c.created_at DESC ");
+    if($rs->num_rows > 0 && $tcount < $page_size)
+    {
+        while($row = $rs->fetch_assoc())
+        {
+            
+            //echo 'chd - ';
+            //print_r($row);echo $row['id'].'<br />';
+            $tcount++;
+            $row['comment'] = utf8_encode($row['comment']);
+            $row['timeago'] = convert_ds($row['created_at']);
+            unset($row['created_at']);
+            $comments_list[] = $row;
+            checkChild($row['id']);
+        }    
+    }        
+    return $comments_list;
+}
+
 switch($action)
 {
     case "push":
@@ -62,6 +87,33 @@ switch($action)
             $content = array('status' => 'success');
         }
         break;
+    case "getCommentsTree":
+        
+        $rs = $d->query("SELECT c.id, c.comment, c.created_at, u.username as author, c.parent_id as pid FROM comments c LEFT JOIN user u ON c.author_id = u.id WHERE c.article_id = '".$_REQUEST['tid']."' AND c.parent_id = 0 ORDER BY c.created_at DESC ");
+        $tcount =  0;
+        
+        $data = array();
+
+        $page_size = PAGE_SIZE * (int)$_REQUEST['page'];    
+        
+        while($row = $rs->fetch_assoc())
+        {
+            if($tcount < $page_size)
+            {
+                //echo 'par - '.$row['id'].'<br />';
+                $row['comment'] = utf8_encode($row['comment']);
+                $row['timeago'] = convert_ds($row['created_at']);
+                unset($row['created_at']);
+                $comments_list[] = $row;
+                $tcount++;
+                checkChild($row['id']);
+            }    
+        }
+        //echo '<pre>';print_r($comments_list);echo '</pre>';        die;
+        //die;    
+        $content = array('status' => 'success', 'data' => $comments_list);
+        break;
+
     case "getComments":
         
         $rs = $d->query("SELECT c.id, c.comment, c.created_at, u.username as author, c.parent_id as pid FROM comments c LEFT JOIN user u ON c.author_id = u.id WHERE c.article_id = '".$_REQUEST['tid']."' ORDER BY c.created_at DESC ");

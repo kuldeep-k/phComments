@@ -1,7 +1,10 @@
 var client_script_name = 'http://localhost/restc/client/api/client.php';
+var page = 1;
 function showMore(){
-    $("#comments").find("div.hide").removeClass('hide');
-    $('.more').html('');
+    //$("#comments").find("div.hide").removeClass('hide');
+    //$('.more').html('');
+    page++;
+    getComments(article_id);
 }
 
 function userSignOut()
@@ -115,7 +118,7 @@ function getComments(tid)
         type: 'post',
         dataType: 'json',
         
-        data: "action=getComments&tid=" + tid,
+        data: "action=getCommentsTree&tid=" + tid+'&page=' + page,
         success: function(response){
             $('#comments li.comment-row').remove();
             var htm = '';

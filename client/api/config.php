@@ -8,6 +8,6 @@ return array(
         'login_check' => array('method' => 'POST'),
         'login' => array('method' => 'POST'),
         'getUserInfo' => array('method' => 'GET'),
-
+        'getCommentsTree' => array('method' => 'GET'),
     )
 );
