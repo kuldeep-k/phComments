@@ -41,6 +41,8 @@ $d = new mysqli('127.0.0.1', 'root', 'root', 'commt');
 
 $server_method = $_SERVER['REQUEST_METHOD'];
 
+//print_r($_REQUEST);
+
 $action = $_REQUEST['action'];
 
 switch($action)
@@ -69,6 +71,7 @@ switch($action)
         {
             $row['comment'] = utf8_encode($row['comment']);
             $row['timeago'] = convert_ds($row['created_at']);
+            unset($row['created_at']);
             $data[] = $row;
         }
         $content = array('status' => 'success', 'data' => $data);

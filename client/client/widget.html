@@ -1,0 +1,38 @@
+<link rel="stylesheet" type="text/css" media="screen" href="client/widget.css" />
+
+<script>
+
+</script>
+<div class="ch-widget">
+<div class="User">
+
+</div>
+
+<div id="comments"> 
+    <h3>Comments : </h3>
+    <ul>
+    <li class="default-comment-row">
+        <div class="row">
+            <div class="comment"></div>
+            <div class="brow"><div class="timeago"></div>
+            <div class="author"></div></div>
+        </div>
+    </li>
+    </ul>
+</div>
+<div class="more"></div>
+
+<div id="post-comment">
+    <textarea id="gcomment" name="gcomment" rows=4 cols=40></textarea>
+    <input type="button" class="button-gpost" name="post" value="Post" />
+</div>
+
+<div id="login-box" class="hide">
+    <label>Username : </label><input type="text" id="uname" name="uname" /> <br/>
+    <label>Password : </label><input type="password" id="upass" name="upass" /> <br/>
+    <input type="button" class="button-login" name="login" onClick="doLogin();" value="Login" />
+</div>
+    <input type="button" class="button-toogleloginbox" name="toogleloginbox" onClick="javascript:$('div#login-box').removeClass('hide');" value="Login" />
+</div>
+
+

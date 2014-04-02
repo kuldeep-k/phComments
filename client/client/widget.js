@@ -1,108 +1,4 @@
-
-<html>
-<head>
-<title>Sample Client Page</title>
-<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
-<style>
-    
-	.ch-widget {    
-        border: 1px solid #000000;
-        font-family: arial;
-        font-size: 12px;
-        line-height: 20px;
-        padding: 15px;
-        width: 870px;
-    }
-
-    .User {
-        font-weight: bold;
-    }
-    #login-box {
-        width: 40%;
-        border: 1px solid #000;
-        padding: 10px;
-    }
-    #comments {
-        margin-top: 25px;
-        padding-left: 50px;
-        width: 75%;
-    }
-    #comments .default-comment-row {
-        list-style-type: none;
-    }
-
-    #comments .comment-row {
-        list-style-type: none;
-        margin-top: 15px;
-    }
-
-    #comments .comment-row .row {
-        padding: 10px;
-        color: #4a6687;
-        font-size: 11px;
-        font-family: arial;
-        background-color: #e2e3e4;
-        border-radius: 15px;
-        box-shadow: 2px 2px 3px 3px #ccc;
-        /*transform: skew(-10deg);
-        -webkit-transform: skew(-10deg);*/
-    }
-
-    #comments .comment-row .comment {
-        margin: 0px;
-        padding: 0px;
-        min-height: 50px;       
-    }
-
-    #comments .comment-row .brow {
-        text-align: right;
-        border: 1px solid white;
-        width: 100%;
-        min-height: 20px;       
-        /*width: 25%;*/
-    }
-
-    #comments .comment-row .timeago {
-        /*margin-left: 78%;*/
-        width: 88%;
-        float:left;
-        border: 1px solid white;
-    }
-
-    #comments .comment-row .author {
-        float:left;
-        width: 10%;
-        border: 1px solid white;
-        font-style: italic;    
-        margin: 0px;
-        padding: 0px;
-    }
-
-    #comments .comment-row .reply {
-        text-align: right;
-        padding-right: 10px;        
-        
-    }
-    #comments .comment-row .reply a {
-        color: #7788a0;
-        text-decoration: none;
-    }
-
-    #comments .comment-row .reply a:hover {
-        color: #7788a0;
-        text-decoration: underline;
-        font-style: italic;
-    }
-
-    .hide {
-        display: none;            
-    }
-</style>
-
-<script>
-//alert('dddd');
-var article_id = 2;
-
+var client_script_name = 'http://localhost/restc/client/api/client.php';
 function showMore(){
     $("#comments").find("div.hide").removeClass('hide');
     $('.more').html('');
@@ -178,7 +74,7 @@ function getUserInfo()
     else
     {
         $.ajax({
-            url: 'http://localhost/restc/server/test.php',
+            url: client_script_name,
             type: 'post',
             dataType: 'json',
             async: false,
@@ -213,9 +109,9 @@ function getUserInfo()
 
 function getComments(tid)
 {
-    
+    //alert('2');   
     $.ajax({
-        url: 'http://localhost/restc/client/api/client.php',
+        url: client_script_name,
         type: 'post',
         dataType: 'json',
         
@@ -328,7 +224,7 @@ function pushComment(tid, pid, comment)
         else
         {
             $.ajax({
-                url: 'http://localhost/restc/server/test.php',
+                url: client_script_name,
                 type: 'post',
                 dataType: 'json',
                 data: "action=push&token="+ ses.token +"&tid=" + tid + "&comment=" + comment + '&pid=' + pid + '&username=' + ses.username,
@@ -360,7 +256,7 @@ function doLogin()
     var password = $('#upass').val();
 
     $.ajax({
-        url: 'http://localhost/restc/server/test.php',
+        url: client_script_name,
         type: 'post',
         dataType: 'json',
         data: "action=login&username=" + uname + "&password=" + password + "",
@@ -395,7 +291,8 @@ function checkLogin()
 {
     var st = false;
     var ses = ckSession.get('session');
-    if(ses == null)
+    
+    if(ses == null || ses == false)
     {
         //console.log('1');
         return false;
@@ -403,7 +300,7 @@ function checkLogin()
     else
     {
         $.ajax({
-            url: 'http://localhost/restc/server/test.php',
+            url: client_script_name,
             type: 'post',
             dataType: 'json',
             async: false,
@@ -430,9 +327,9 @@ function periodicallyCheckNewComments()
     //setTimeout('periodicallyCheckNewComments()', 10000);
 }
 
-var ckSession = new Object();
+    var ckSession = new Object();
 
-$(document).ready(function(){
+
 
     ckObject.prototype.set = function(){
         if(typeof this.value == 'object')
@@ -462,6 +359,10 @@ $(document).ready(function(){
         document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:01 GMT; path=/';
     }
 
+
+
+function loadWidget()
+{
     ckSession = getSession();
     
     console.log(ckSession);
@@ -477,84 +378,13 @@ $(document).ready(function(){
         //doLogin('admin', 'admin');
     });
 */
+   // alert('1');
     getLoginInfo();
     getComments(article_id);
 
     //setTimeout('periodicallyCheckNewComments()', 10000);
 
-});
-
-</script>
-</head>
-<h1>This is Article Heading </h1>
-<br/><br/>
-<article>This is Article Body This is Article Body This is Article Body This is Article Body This is Article Body This is Article Body This is Article Body This is Article Body This is Article Body This is Article Body This is Article Body This is Article Body This is Article Body This is Article Body This is Article Body This is Article Body This is Article Body This is Article Body This is Article Body This is Article Body This is Article Body This is Article Body This is Article Body This is Article Body This is Article Body This is Article Body This is Article Body This is Article Body This is Article Body This is Article Body This is Article Body This is Article Body This is Article Body This is Article Body This is Article Body This is Article Body This is Article Body This is Article Body This is Article Body This is Article Body This is Article Body This is Article Body This is Article Body This is Article Body This is Article Body This is Article Body This is Article Body This is Article Body This is Article Body This is Article Body This is Article Body This is Article Body This is Article Body This is Article Body This is Article Body  </article>
-
-<br/><br/>
-<article>
-
-<?php
-
-echo time();
-
-?>
-<div class="ch-widget">
-<div class="User">
-
-</div>
-
-<div id="comments"> 
-    <h3>Comments : </h3>
-    <ul>
-    <li class="default-comment-row">
-        <div class="row">
-            <div class="comment"></div>
-            <div class="brow"><div class="timeago"></div>
-            <div class="author"></div></div>
-        </div>
-    </li>
-    </ul>
-</div>
-<div class="more"></div>
-
-<div id="post-comment">
-    <textarea id="gcomment" name="gcomment" rows=4 cols=40></textarea>
-    <input type="button" class="button-gpost" name="post" value="Post" />
-</div>
-
-<div id="login-box" class="hide">
-    <label>Username : </label><input type="text" id="uname" name="uname" /> <br/>
-    <label>Password : </label><input type="password" id="upass" name="upass" /> <br/>
-    <input type="button" class="button-login" name="login" onClick="doLogin();" value="Login" />
-</div>
-    <input type="button" class="button-toogleloginbox" name="toogleloginbox" onClick="javascript:$('div#login-box').removeClass('hide');" value="Login" />
-</div>
 
 
- <div id="disqus_thread"></div>
-    <!--<script type="text/javascript">
-        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
-        var disqus_shortname = 'kuldeep15'; // required: replace example with your forum shortname
 
-        /* * * DON'T EDIT BELOW THIS LINE * * */
-        (function() {
-            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
-            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-        })();
-    </script>
-    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
-    
-
-<script type="text/javascript">
-			  var disqus_shortname = 'dnai';
-			  var disqus_identifier = 1966450;
-			  (function(){
-				var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-				dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
-				(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-			  })();
-			</script>
--->
-</article>
+}
